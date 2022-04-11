@@ -1,12 +1,12 @@
 #pragma once
 
-class Later
+class Later1
 {
 public:
     //int f = 1;
 
     template <class callable, class... arguments>
-    Later(int after, bool async, callable&& f, arguments&&... args)
+    Later1(int after, bool async, callable&& f, arguments&&... args)
     {
         std::function<typename std::result_of<callable(arguments...)>::type()> task(std::bind(std::forward<callable>(f), std::forward<arguments>(args)...));
 
