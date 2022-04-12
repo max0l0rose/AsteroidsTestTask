@@ -19,9 +19,15 @@ enum class FRMouseButton {
 	COUNT
 };
 
+
+//*************************************************************************************
+// Bug - if change the order of methods in this class - the app is got crached.
+// Bug2 - destructors aren't got called.
+//*************************************************************************************
+
+
 class Framework {
 public:
-
 	// no function calls are available here, this function should only return width, height and fullscreen values
 	virtual void PreInit(int& width, int& height, bool& fullscreen) = 0;
 
@@ -45,7 +51,8 @@ public:
 
 	virtual const char* GetTitle() = 0;
 
-	virtual ~Framework() {
+	virtual ~Framework() 
+	{
 	};
 };
 

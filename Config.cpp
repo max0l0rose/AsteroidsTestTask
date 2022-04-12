@@ -2,4 +2,5 @@
 
 int Config::width = 0;
 int Config::height = 0;
+int Config::speedFlag = 0;
 

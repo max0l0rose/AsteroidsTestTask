@@ -4,15 +4,15 @@
 
 //#include "Later.h"
 
-//#include "SDL.h"
+#include "SDL.h"
 #include "Framework.h"
 
 #include "Asteroids.h"
 
-#include <iostream>
 #include <chrono>
 #include <future>
 #include "Config.h"
+#include <iostream>
 
 using namespace std;
 
@@ -22,60 +22,59 @@ class MyFramework : public Framework {
 
 	Config config;
 
-	//Sprite* sprite = NULL;
+	Sprite* bg = NULL;
 	static int fps;
 public:
 
 	virtual void PreInit(int& width, int& height, bool& fullscreen)
 	{
-		config.width = width = 800;
-		config.height = height = 600;
+		config.width = width = 1000; // 1920;
+		config.height = height = 800; //1080;
 		fullscreen = false;
-	}
-
-
-	static void showFps() {
-		while (true) {
-			cout << "fps=" << fps << endl;
-			fps = 0;
-			this_thread::sleep_for(chrono::milliseconds(1000));
-		}
 	}
 
 
 	virtual bool Init() {
 		fps = 0;
 		asteroids.init();
-		//sprite = createSprite("data\\big_asteroid.png");
+		bg = createSprite("data\\background_big.png");
 		////Later later_test2(1000, true, &test2, 101);
 		thread t1(showFps);
 		t1.detach();
 
+		showCursor(true);
+
 		return true;
 	}
 
-	int x = 0;
-
 	virtual bool Tick() {
-		//Uint32 q = SDL_GetTicks();
-		//cout << q << " tics " << endl;
+		if (pause)
+			return false;
 
-		//if (sprite != NULL) {
-		//	drawSprite(sprite, x++, 10);
-		//	if (x > width)
-		//		x = -100;
-		//}
+		Uint32 ticks = SDL_GetTicks();
+		//cout << ticks << " ";
+
+		if (++config.speedFlag > 3) {
+			config.speedFlag = 1;
+			if (//ticks > 2000 && 
+				config.speedFlag)
+				asteroids.checkCollisions();
+		}
 
 		fps++;
 
 		//drawTestBackground();
+		asteroids.move();
+		drawSprite(bg, 0, 0);
 		asteroids.draw();
+
+		this_thread::sleep_for(chrono::milliseconds(10));
+
 
 		return false;
 	}
 
 	virtual void onMouseMove(int x, int y, int xrelative, int yrelative) {
-
 	}
 
 	virtual void onMouseButtonClick(FRMouseButton button, bool isReleased) {
@@ -90,7 +89,9 @@ public:
 		//SDL_Renderer* renderer = SDL_GetRenderer(window);
 	}
 
+	bool pause = false;
 	virtual void onKeyPressed(FRKey k) {
+		pause = !pause;
 		cout << "onKeyPressed: " << (int)k << " " << endl;
 	}
 
@@ -103,11 +104,24 @@ public:
 		return "asteroids";
 	}
 
-	void Close() {
-		//delete sprite;
+	static void showFps() {
+		while (true) {
+			cout << "fps=" << fps << endl;
+			fps = 0;
+			this_thread::sleep_for(chrono::milliseconds(1000));
+		}
 	}
 
-	~MyFramework() {
+
+	virtual void Close() 
+	{
+		cout << "Close()" << endl;
+		//delete bg;
+	}
+
+	virtual ~MyFramework() 
+	{
+		cout << "~MyFramework()" << endl;
 		//delete sprite;
 	}
 
