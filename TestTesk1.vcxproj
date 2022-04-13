@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -117,6 +117,9 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Later.cpp" />
     <ClCompile Include="MyFramework.cpp" />
+    <ClCompile Include="MyUtil.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SpaceObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
@@ -128,6 +131,10 @@
     <ClInclude Include="FrameworkAPI.h" />
     <ClInclude Include="Later.h" />
     <ClInclude Include="MyFramework.h" />
+    <ClInclude Include="MyUtil.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="SpaceObject.h" />
+    <ClInclude Include="Util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

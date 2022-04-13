@@ -17,17 +17,8 @@ private:
 			sprite2 = createSprite("data\\small_asteroid2.png");
 		}
 	}
-public:
-	AsteroidSmall() : Asteroid() {
-		init();
-	}
 
-	AsteroidSmall(SDL_Point coord, SDL_Point mVector)
-		: Asteroid(coord, mVector)
-	{
-		init();
-	}
-
+protected:
 	virtual Sprite* getSprite() const {
 		return collisionImmunity == 0 ? sprite : sprite2;
 	}
@@ -39,5 +30,15 @@ public:
 		return height;
 	}
 
+public:
+	AsteroidSmall() : Asteroid() {
+		init();
+	}
+
+	AsteroidSmall(SDL_Point coord, SDL_Point mVector)
+		: Asteroid(coord, mVector)
+	{
+		init();
+	}
 };
 

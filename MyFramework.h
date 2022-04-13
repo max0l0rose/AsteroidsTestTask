@@ -4,15 +4,17 @@
 
 //#include "Later.h"
 
-#include "SDL.h"
-#include "Framework.h"
-
-#include "Asteroids.h"
-
 #include <chrono>
 #include <future>
 #include "Config.h"
 #include <iostream>
+
+#include "SDL.h"
+#include "Framework.h"
+#include "Asteroids.h"
+
+#include "Player.h"
+
 
 using namespace std;
 
@@ -20,7 +22,9 @@ class MyFramework : public Framework {
 
 	Asteroids asteroids;
 
-	Config config;
+	//Config config;
+
+	Player player;
 
 	Sprite* bg = NULL;
 	static int fps;
@@ -28,8 +32,8 @@ public:
 
 	virtual void PreInit(int& width, int& height, bool& fullscreen)
 	{
-		config.width = width = 1000; // 1920;
-		config.height = height = 800; //1080;
+		Config::width = width = 1200; // 1920;
+		Config::height = height = 800; //1080;
 		fullscreen = false;
 	}
 
@@ -37,6 +41,8 @@ public:
 	virtual bool Init() {
 		fps = 0;
 		asteroids.init();
+		player.init();
+
 		bg = createSprite("data\\background_big.png");
 		////Later later_test2(1000, true, &test2, 101);
 		thread t1(showFps);
@@ -44,35 +50,38 @@ public:
 
 		showCursor(true);
 
+		//Config::player = { 0 };
+		//Config::playerVect = { 0 };
+
 		return true;
 	}
 
-	virtual bool Tick() {
-		if (pause)
-			return false;
 
+	virtual bool Tick() {
 		Uint32 ticks = SDL_GetTicks();
 		//cout << ticks << " ";
 
-		if (++config.speedFlag > 3) {
-			config.speedFlag = 1;
-			if (//ticks > 2000 && 
-				config.speedFlag)
-				asteroids.checkCollisions();
+		if (++Config::speedFlag > 3) {
+			Config::speedFlag = 1;
 		}
 
 		fps++;
 
 		//drawTestBackground();
-		asteroids.move();
+		if (!Config::getPause()) {
+			asteroids.checkCollisions();
+			asteroids.move();
+		}
 		drawSprite(bg, 0, 0);
 		asteroids.draw();
+		player.draw();
 
 		this_thread::sleep_for(chrono::milliseconds(10));
 
 
 		return false;
 	}
+
 
 	virtual void onMouseMove(int x, int y, int xrelative, int yrelative) {
 	}
@@ -89,13 +98,33 @@ public:
 		//SDL_Renderer* renderer = SDL_GetRenderer(window);
 	}
 
-	bool pause = false;
 	virtual void onKeyPressed(FRKey k) {
-		pause = !pause;
+		switch (k)
+		{
+		case FRKey::RIGHT:
+			//Config::playerVect.x = 20;
+			break;
+		case FRKey::LEFT:
+			//Config::player.x = -20;
+			break;
+		case FRKey::DOWN:
+			//Config::player.y = 20;
+			break;
+		case FRKey::UP:
+			//Config::player.y = -20;
+			break;
+		case FRKey::COUNT:
+			//Config::player.y--;
+			break;
+		default:
+			break;
+		}
+		//Config::setPause(true);
 		cout << "onKeyPressed: " << (int)k << " " << endl;
 	}
 
 	virtual void onKeyReleased(FRKey k) {
+		//Config::setPause(false);
 		cout << "onKeyReleased: " << (int)k << " " << endl;
 	}
 
