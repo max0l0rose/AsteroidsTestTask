@@ -16,11 +16,14 @@ using namespace std;
 
 class Asteroids
 {
-	private:
+private:
 	array<Asteroid*, 20> arr;
+	Config& config;
 
 public:
-	Asteroids() {
+	Asteroids(Config& cfg) 
+		: config(cfg) 
+	{
 		for (size_t i = 0; i < arr.size(); i++)
 			arr[i] = NULL;
 	}
@@ -58,9 +61,9 @@ public:
 				int x = rand() % w;
 				int y = rand() % h;
 				if (type>=5)
-					arr[i] = new AsteroidSmall();
+					arr[i] = new AsteroidSmall(config);
 				else
-					arr[i] = new AsteroidBig();
+					arr[i] = new AsteroidBig(config);
 				arr[i]->coord.x = x;
 				arr[i]->coord.y = y;
 				speedX = rand() % 6 - 3;
@@ -101,12 +104,12 @@ public:
 			for (size_t j = i+1; j < arr.size(); j++) 
 			{
 				if (
-					//abs(arr[i]->moveVector.x) >= Config::speedFlag
-					//|| abs(arr[i]->moveVector.y) >= Config::speedFlag
+					//abs(arr[i]->moveVector.x) >= config->speedFlag
+					//|| abs(arr[i]->moveVector.y) >= config->speedFlag
 					//||
-					//abs(arr[j]->moveVector.x) >= Config::speedFlag
-					//|| abs(arr[j]->moveVector.y) >= Config::speedFlag
-					Config::speedFlag == 3
+					//abs(arr[j]->moveVector.x) >= config->speedFlag
+					//|| abs(arr[j]->moveVector.y) >= config->speedFlag
+					config.speedFlag == 3
 					)
 				{
 					if (arr[i]->checkCollision(arr[j]) == SDL_TRUE) {
@@ -161,7 +164,7 @@ public:
 
 
 	//void flyApart(Asteroid* a, Asteroid* b) {
-	//	//Config::setPause(true);
+	//	//config->setPause(true);
 
 	//	//MyUtil::gerRndVector(a->moveVector);
 	//	//a->coord.x += a->moveVector.x * 10;

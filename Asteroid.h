@@ -25,39 +25,38 @@ public:
 	//SDL_Rect collisionRect;
 	//bool collision = false;
 
-	//Config config;
-
-	Asteroid()
+	Asteroid(Config& cfg) 
+		: SpaceObject(cfg)
 	{
 	}
 
-	Asteroid(SDL_Point coord, SDL_Point vector)
-		: SpaceObject(coord, vector)
+	Asteroid(SDL_Point coord, SDL_Point vector, Config& cfg)
+		: SpaceObject(coord, vector, cfg)
 	{
 	}
 
 	virtual void move() {
-		if (abs(vector.x) >= Config::speedFlag) {
+		if (abs(vector.x) >= config.speedFlag) {
 			if (vector.x > 0) 
 				coord.x += 1;
 			else
 				coord.x -= 1;
 		}
-		if (coord.x > Config::width)
+		if (coord.x > config.width)
 			coord.x = -getWidth();
 		if (coord.x < -getWidth())
-			coord.x = Config::width;
+			coord.x = config.width;
 
-		if (abs(vector.y) >= Config::speedFlag) {
+		if (abs(vector.y) >= config.speedFlag) {
 			if (vector.y > 0)
 				coord.y += 1;
 			else
 				coord.y -= 1;
 		}
-		if (coord.y > Config::height)
+		if (coord.y > config.height)
 			coord.y = -getHeight();
 		if (coord.y < -getHeight())
-			coord.y = Config::height;
+			coord.y = config.height;
 	}
 
 

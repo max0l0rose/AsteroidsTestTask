@@ -1,50 +1,57 @@
 #pragma once
 
 #include <SDL_rect.h>
+#include <iostream>
 
 #include "SpaceObject.h"
 
 #include "Config.h"
 
+using namespace std;
+
 class Player : public SpaceObject
 {
-	static Sprite* sprite;
-	static int width, height;
+	Sprite* sprite = NULL;
+	int width = 0, height = 0;
 
 public:
-	SDL_Point coord = {0};
-	SDL_Point vector = {0};
-	int screenX, screenY;
+
+	Player(Config& cfg) 
+		: SpaceObject(cfg)
+	{
+	}
 
 	void init() {
 		if (!sprite) {
 			sprite = createSprite("data\\spaceship.png");
 			getSpriteSize(sprite, width, height);
 
-			screenX = (Config::width - width) / 2;
-			screenY = (Config::height - height) / 2;
+			coord.x = (config.width - width) / 2;
+			coord.y = (config.height - height) / 2;
 		}
 	}
 
 	void move() {
 		if (vector.x != 0) {
-			coord.x += vector.x;
+			config.position.x += vector.x;
 			if (vector.x>0)
 				vector.x--;
 			else
 				vector.x++;
+			cout << "config->position.x" << config.position.x << endl;
 		}
 		if (vector.y != 0) {
-			coord.y += vector.y;
+			config.position.y += vector.y;
 			if (vector.y > 0)
 				vector.y--;
 			else
 				vector.y++;
+			cout << "config->position.y" << config.position.y << endl;
 		}
 	}
 
-	void draw() {
-		drawSprite(getSprite(), screenX, screenY);
+	virtual void draw() {
+		drawSprite(getSprite(), coord.x, coord.y);
 	}
 
 	virtual Sprite* getSprite() const {

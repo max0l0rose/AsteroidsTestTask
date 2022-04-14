@@ -31,12 +31,12 @@ protected:
 	}
 
 public:
-	AsteroidSmall() : Asteroid() {
+	AsteroidSmall(Config& cfg) : Asteroid(cfg) {
 		init();
 	}
 
-	AsteroidSmall(SDL_Point coord, SDL_Point mVector)
-		: Asteroid(coord, mVector)
+	AsteroidSmall(SDL_Point coord, SDL_Point vector, Config& cfg)
+		: Asteroid(coord, vector, cfg)
 	{
 		init();
 	}

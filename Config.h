@@ -5,17 +5,19 @@
 
 struct Config
 {
-	static int width, height;
-	static int speedFlag;
+	int width = 0, height = 0;
+	int speedFlag = 0;
+	SDL_Point position = { 0 };
 
-	static void setPause(bool pause) {
+
+	void setPause(bool pause) {
 		Config::pause = pause;
 	}
-	static bool getPause() {
+	bool getPause() {
 		return Config::pause;
 	}
 
 private:
-	static bool pause;
+	bool pause = false;
 };
 

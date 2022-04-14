@@ -6,34 +6,37 @@
 
 #include <chrono>
 #include <future>
-#include "Config.h"
 #include <iostream>
 
 #include "SDL.h"
+#include "Config.h"
 #include "Framework.h"
 #include "Asteroids.h"
 
 #include "Player.h"
 
-
 using namespace std;
 
 class MyFramework : public Framework {
-
 	Asteroids asteroids;
-
-	//Config config;
-
+	Config config;
 	Player player;
 
 	Sprite* bg = NULL;
 	static int fps;
+
 public:
+	FRKey key = (FRKey)-1;
+
+	MyFramework() 
+		: player(config), asteroids(config)
+	{
+	}
 
 	virtual void PreInit(int& width, int& height, bool& fullscreen)
 	{
-		Config::width = width = 1200; // 1920;
-		Config::height = height = 800; //1080;
+		config.width = width = 1200; // 1920;
+		config.height = height = 800; //1080;
 		fullscreen = false;
 	}
 
@@ -50,8 +53,8 @@ public:
 
 		showCursor(true);
 
-		//Config::player = { 0 };
-		//Config::playerVect = { 0 };
+		//config->player = { 0 };
+		//config->playerVect = { 0 };
 
 		return true;
 	}
@@ -61,20 +64,45 @@ public:
 		Uint32 ticks = SDL_GetTicks();
 		//cout << ticks << " ";
 
-		if (++Config::speedFlag > 3) {
-			Config::speedFlag = 1;
+		if (++config.speedFlag > 3) {
+			config.speedFlag = 1;
 		}
 
 		fps++;
 
 		//drawTestBackground();
-		if (!Config::getPause()) {
+		if (!config.getPause()) {
 			asteroids.checkCollisions();
 			asteroids.move();
 		}
 		drawSprite(bg, 0, 0);
 		asteroids.draw();
 		player.draw();
+		player.move();
+
+
+		switch (key)
+		{
+		case FRKey::RIGHT:
+			player.vector.x = 10;
+			break;
+		case FRKey::LEFT:
+			player.vector.x = -10;
+			break;
+		case FRKey::DOWN:
+			player.vector.y = 10;
+			break;
+		case FRKey::UP:
+			player.vector.y = -10;
+			break;
+		case FRKey::COUNT:
+			//config->player.y--;
+			break;
+		default:
+			break;
+		}
+		//cout << "key: " << (int)key << " " << endl;
+
 
 		this_thread::sleep_for(chrono::milliseconds(10));
 
@@ -99,32 +127,14 @@ public:
 	}
 
 	virtual void onKeyPressed(FRKey k) {
-		switch (k)
-		{
-		case FRKey::RIGHT:
-			//Config::playerVect.x = 20;
-			break;
-		case FRKey::LEFT:
-			//Config::player.x = -20;
-			break;
-		case FRKey::DOWN:
-			//Config::player.y = 20;
-			break;
-		case FRKey::UP:
-			//Config::player.y = -20;
-			break;
-		case FRKey::COUNT:
-			//Config::player.y--;
-			break;
-		default:
-			break;
-		}
-		//Config::setPause(true);
+		key = k;
+		//config->setPause(true);
 		cout << "onKeyPressed: " << (int)k << " " << endl;
 	}
 
 	virtual void onKeyReleased(FRKey k) {
-		//Config::setPause(false);
+		key = (FRKey)-1;
+		//config->setPause(false);
 		cout << "onKeyReleased: " << (int)k << " " << endl;
 	}
 
