@@ -9,6 +9,11 @@ struct Config
 	int speedFlag = 0;
 	SDL_Point position = { 0 };
 
+#define GAME_STOPPED 0
+#define GAME_INIT 1
+#define GAME_GOES 2
+
+	int gameMode = GAME_STOPPED;
 
 	void setPause(bool pause) {
 		Config::pause = pause;

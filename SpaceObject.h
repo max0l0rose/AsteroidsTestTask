@@ -2,18 +2,11 @@
 #include <SDL_rect.h>
 
 #include "FrameworkAPI.h"
-
 #include "Config.h"
 
 class SpaceObject
 {
 protected:
-	//static Sprite* sprite;
-
-	virtual Sprite* getSprite() const = 0;
-	virtual int getWidth() const = 0;
-	virtual int getHeight() const = 0;
-
 	Config& config;
 public:
 	SDL_Point coord = { 0 };
@@ -31,8 +24,14 @@ public:
 	}
 
 	virtual void draw() {
-		drawSprite(getSprite(), coord.x + config.position.x, coord.y + config.position.y);
+		int x = coord.x - config.position.x;
+		int y = coord.y - config.position.y;
+		drawSprite(getSprite(), x, y);
 	}
+
+	virtual Sprite* getSprite() const = 0;
+	virtual int getWidth() const = 0;
+	virtual int getHeight() const = 0;
 
 };
 

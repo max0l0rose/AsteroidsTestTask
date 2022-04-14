@@ -1,29 +1,20 @@
 #pragma once
-
 //#ifndef asteroid
 //#define asteroid
 
-//#include "MyFramework.h"
 
 #include <cstdlib>
-
-#include "Framework.h"
-#include "Config.h"
-
 #include <SDL_rect.h>
 
+//#include "Framework.h"
+#include "Config.h"
 #include "SpaceObject.h"
 
-//enum AsterType {
-//	SMALL, BIG
-//};
 
 class Asteroid : public SpaceObject
 {
 public:
-	int collisionImmunity = 0;
-	//SDL_Rect collisionRect;
-	//bool collision = false;
+	int collisionFlag = 0;
 
 	Asteroid(Config& cfg) 
 		: SpaceObject(cfg)
@@ -42,10 +33,10 @@ public:
 			else
 				coord.x -= 1;
 		}
-		if (coord.x > config.width)
-			coord.x = -getWidth();
-		if (coord.x < -getWidth())
-			coord.x = config.width;
+		if (coord.x > config.position.x+config.width)
+			coord.x = config.position.x-getWidth();
+		if (coord.x < config.position.x-getWidth())
+			coord.x = config.position.x+config.width;
 
 		if (abs(vector.y) >= config.speedFlag) {
 			if (vector.y > 0)
@@ -53,16 +44,14 @@ public:
 			else
 				coord.y -= 1;
 		}
-		if (coord.y > config.height)
-			coord.y = -getHeight();
-		if (coord.y < -getHeight())
-			coord.y = config.height;
+		if (coord.y > config.position.y+config.height)
+			coord.y = config.position.y-getHeight();
+		if (coord.y < config.position.y-getHeight())
+			coord.y = config.position.y+config.height;
 	}
 
 
-	SDL_bool checkCollision(Asteroid* const b
-									//, SDL_Rect& ri
-								) {
+	SDL_bool checkCollision(SpaceObject& b) {
 		SDL_Rect r1;
 		r1.x = coord.x;
 		r1.y = coord.y;
@@ -70,19 +59,13 @@ public:
 		r1.h = getHeight();
 
 		SDL_Rect r2;
-		r2.x = b->coord.x;
-		r2.y = b->coord.y;
-		r2.w = b->getWidth();
-		r2.h = b->getHeight();
+		r2.x = b.coord.x;
+		r2.y = b.coord.y;
+		r2.w = b.getWidth();
+		r2.h = b.getHeight();
 
-		SDL_Rect ri;
+		SDL_Rect ri; //stub
 		SDL_bool res = SDL_IntersectRect(&r1, &r2, &ri);
-		
-		//if (ri.w>1 || ri.h>1)
-		//	collisionRect = ri;
-
-		//if (ri.w > 2 && ri.h > 2)
-		//	b->collision = collision = true;
 
 		return res;
 	}

@@ -8,6 +8,17 @@ private:
 	static Sprite* sprite2;
 	static int width, height;
 
+public:
+	AsteroidBig(Config& cfg) : Asteroid(cfg) {
+		init();
+	}
+
+	AsteroidBig(SDL_Point coord, SDL_Point vector, Config& cfg)
+		: Asteroid(coord, vector, cfg)
+	{
+		init();
+	}
+
 	void init() {
 		if (!sprite) {
 			sprite = createSprite("data\\big_asteroid.png");
@@ -19,26 +30,17 @@ private:
 	}
 
 protected:
-	virtual Sprite* getSprite() const {
-		return collisionImmunity == 0 ? sprite : sprite2;
+	Sprite* getSprite() const {
+		return collisionFlag == 0 ? sprite : sprite2;
 	}
 
-	virtual int getWidth() const {
+	int getWidth() const {
 		return width;
 	}
-	virtual int getHeight() const {
+
+	int getHeight() const {
 		return height;
 	}
 
-public:
-	AsteroidBig(Config& cfg) : Asteroid(cfg) {
-		init();
-	}
-
-	AsteroidBig(SDL_Point coord, SDL_Point vector,Config& cfg)
-		: Asteroid(coord, vector, cfg)
-	{
-		init();
-	}
 };
 

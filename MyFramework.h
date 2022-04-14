@@ -2,8 +2,6 @@
 //#ifndef myf
 //#define myf
 
-//#include "Later.h"
-
 #include <chrono>
 #include <future>
 #include <iostream>
@@ -18,18 +16,27 @@
 using namespace std;
 
 class MyFramework : public Framework {
+private:
+	enum class Direction {
+		NONE = 0,
+		RIGHT = 1,
+		LEFT = 2,
+		DOWN = 4,
+		UP = 8
+	};
+
 	Asteroids asteroids;
 	Config config;
 	Player player;
 
 	Sprite* bg = NULL;
 	static int fps;
+	Direction direction = Direction::NONE;
 
 public:
-	FRKey key = (FRKey)-1;
 
 	MyFramework() 
-		: player(config), asteroids(config)
+		: player(asteroids, config), asteroids(config)
 	{
 	}
 
@@ -43,20 +50,26 @@ public:
 
 	virtual bool Init() {
 		fps = 0;
-		asteroids.init();
-		player.init();
+
+		startGame(); 
 
 		bg = createSprite("data\\background_big.png");
-		////Later later_test2(1000, true, &test2, 101);
-		thread t1(showFps);
-		t1.detach();
+		thread t2(showFps);
+		t2.detach();
 
 		showCursor(true);
 
-		//config->player = { 0 };
-		//config->playerVect = { 0 };
-
 		return true;
+	}
+
+
+	void startGame() {
+		if (config.gameMode == GAME_INIT)
+			return;
+		config.gameMode = GAME_INIT;
+		config.position = { 0 };
+		asteroids.init(config.gameMode);
+		player.init();
 	}
 
 
@@ -71,45 +84,29 @@ public:
 		fps++;
 
 		//drawTestBackground();
-		if (!config.getPause()) {
-			asteroids.checkCollisions();
-			asteroids.move();
-		}
 		drawSprite(bg, 0, 0);
 		asteroids.draw();
-		player.draw();
-		player.move();
-
-
-		switch (key)
-		{
-		case FRKey::RIGHT:
-			player.vector.x = 10;
-			break;
-		case FRKey::LEFT:
-			player.vector.x = -10;
-			break;
-		case FRKey::DOWN:
-			player.vector.y = 10;
-			break;
-		case FRKey::UP:
-			player.vector.y = -10;
-			break;
-		case FRKey::COUNT:
-			//config->player.y--;
-			break;
-		default:
-			break;
+		if (config.gameMode > GAME_STOPPED) {
+			player.draw();
+			asteroids.checkCollisionsToEachOther();
+			player.checkCollisionsToAsteroids();
+			asteroids.move();
+			player.move();
 		}
-		//cout << "key: " << (int)key << " " << endl;
 
+
+		if ((int)direction & (int)Direction::RIGHT)
+			player.vector.x = 3;
+		if ((int)direction & (int)Direction::LEFT)
+			player.vector.x = -3;
+		if ((int)direction & (int)Direction::DOWN)
+			player.vector.y = 3;
+		if ((int)direction & (int)Direction::UP)
+			player.vector.y = -3;
 
 		this_thread::sleep_for(chrono::milliseconds(10));
-
-
 		return false;
 	}
-
 
 	virtual void onMouseMove(int x, int y, int xrelative, int yrelative) {
 	}
@@ -127,13 +124,63 @@ public:
 	}
 
 	virtual void onKeyPressed(FRKey k) {
-		key = k;
+		if (config.gameMode == 0) {
+			thread t1([this]() {
+				//this_thread::sleep_for(chrono::milliseconds(1000));
+				startGame();
+			});
+			t1.detach();
+			return;
+		}
+
+		switch (k)
+		{
+		case FRKey::RIGHT:
+			direction = (Direction)((int)direction | (int)Direction::RIGHT);
+			break;
+		case FRKey::LEFT:
+			direction = (Direction)((int)direction | (int)Direction::LEFT);
+			break;
+		case FRKey::DOWN:
+			direction = (Direction)((int)direction | (int)Direction::DOWN);
+			break;
+		case FRKey::UP:
+			direction = (Direction)((int)direction | (int)Direction::UP);
+			break;
+		case FRKey::COUNT:
+			//config->player.y--;
+			break;
+		default:
+			break;
+		}
+		cout << "direction: " << (int)direction << " " << endl;
+
+		//key = k;
 		//config->setPause(true);
 		cout << "onKeyPressed: " << (int)k << " " << endl;
 	}
 
 	virtual void onKeyReleased(FRKey k) {
-		key = (FRKey)-1;
+		switch (k)
+		{
+		case FRKey::RIGHT:
+			direction = (Direction)((int)direction & ~(int)Direction::RIGHT);
+			break;
+		case FRKey::LEFT:
+			direction = (Direction)((int)direction & ~(int)Direction::LEFT);
+			break;
+		case FRKey::DOWN:
+			direction = (Direction)((int)direction & ~(int)Direction::DOWN);
+			break;
+		case FRKey::UP:
+			direction = (Direction)((int)direction & ~(int)Direction::UP);
+			break;
+		default:
+			break;
+		}
+		cout << "direction: " << (int)direction << " " << endl;
+
+		//key = (FRKey)-1;
 		//config->setPause(false);
 		cout << "onKeyReleased: " << (int)k << " " << endl;
 	}
