@@ -12,6 +12,7 @@
 #include "Asteroids.h"
 
 #include "Player.h"
+#include "Bullets.h"
 
 using namespace std;
 
@@ -28,6 +29,7 @@ private:
 	Asteroids asteroids;
 	Config config;
 	Player player;
+	Bullets bullets;
 
 	Sprite* bg = NULL;
 	static int fps;
@@ -36,7 +38,7 @@ private:
 public:
 
 	MyFramework() 
-		: player(asteroids, config), asteroids(config)
+		: player(asteroids, config), asteroids(config), bullets(asteroids, config)
 	{
 	}
 
@@ -88,10 +90,13 @@ public:
 		asteroids.draw();
 		if (config.gameMode > GAME_STOPPED) {
 			player.draw();
+			bullets.draw();
 			asteroids.checkCollisionsToEachOther();
 			player.checkCollisionsToAsteroids();
+			bullets.checkCollisions();
 			asteroids.move();
 			player.move();
+			bullets.move();
 		}
 
 
@@ -108,11 +113,23 @@ public:
 		return false;
 	}
 
+	int mouseX = 0, mouseY = 0;
+
 	virtual void onMouseMove(int x, int y, int xrelative, int yrelative) {
+		//cout << "onMouseMove: " << x << " " << y << " " << xrelative << " " << yrelative << endl;
+
+		mouseX = x;
+		mouseY = y;
 	}
 
 	virtual void onMouseButtonClick(FRMouseButton button, bool isReleased) {
 		cout << "onMouseButtonClick: " << (int)button << " " << !isReleased << endl;
+
+		if (!isReleased) {
+			SDL_Point start = { player.coord.x, player.coord.y };
+			SDL_FPoint dest = { mouseX, mouseY };
+			bullets.createBullet(start, dest, 3);
+		}
 
 		//SDL_Window* window = SDL_CreateWindowFrom(0);
 		//SDL_Window* window2 = SDL_GetWindowFromID(0);

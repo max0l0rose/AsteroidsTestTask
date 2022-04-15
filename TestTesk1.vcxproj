@@ -113,6 +113,8 @@
     <ClCompile Include="AsteroidBig.cpp" />
     <ClCompile Include="Asteroids.cpp" />
     <ClCompile Include="AsteroidSmall.cpp" />
+    <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="Bullets.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Later.cpp" />
@@ -126,6 +128,8 @@
     <ClInclude Include="AsteroidBig.h" />
     <ClInclude Include="Asteroids.h" />
     <ClInclude Include="AsteroidSmall.h" />
+    <ClInclude Include="Bullet.h" />
+    <ClInclude Include="Bullets.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Framework.h" />
     <ClInclude Include="FrameworkAPI.h" />

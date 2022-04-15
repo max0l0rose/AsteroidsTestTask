@@ -71,7 +71,9 @@ public:
 
 	void checkCollisionsToAsteroids() 
 	{
-		asteroids.checkCollisionsToObj(*this);
+		if (asteroids.checkCollisionsToObj(*this)) {
+			config.gameMode = GAME_STOPPED;
+		}
 	}
 
 

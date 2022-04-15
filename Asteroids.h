@@ -152,25 +152,26 @@ public:
 
 
 
-	void checkCollisionsToObj(SpaceObject& o) {
+	bool checkCollisionsToObj(SpaceObject& o) {
 		if (config.speedFlag < 3)
-			return;
+			return false;
 
 		for (size_t j = 0; j < arr.size(); j++)
 		{
 			if (arr[j] == NULL)
 				break;
 
-			if (arr[j]->checkCollision(o) == SDL_TRUE) 
-			{
-				config.gameMode = GAME_STOPPED;
+			if (arr[j]->checkCollision(o) == SDL_TRUE) {
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 
 	void bounce(Asteroid* a, Asteroid* b) {
-		SDL_Point tmpVec = a->vector;
+		SDL_FPoint tmpVec = a->vector;
 		a->vector = b->vector;
 		if (a->collisionFlag == 0) 
 #define COLLISION_TICKS 30
