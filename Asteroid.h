@@ -13,14 +13,12 @@
 class Asteroid : public SpaceObject
 {
 public:
-	int collisionFlag = 0;
-
 	Asteroid(Config& cfg) 
 		: SpaceObject(cfg)
 	{
 	}
 
-	Asteroid(SDL_Point coord, SDL_FPoint vector, Config& cfg)
+	Asteroid(SDL_FPoint coord, SDL_FPoint vector, Config& cfg)
 		: SpaceObject(coord, vector, cfg)
 	{
 	}

@@ -71,7 +71,8 @@ public:
 
 	void checkCollisionsToAsteroids() 
 	{
-		if (asteroids.checkCollisionsToObj(*this)) {
+		Asteroid* ast = asteroids.checkCollisionsToObj(*this);
+		if (ast != nullptr) {
 			config.gameMode = GAME_STOPPED;
 		}
 	}

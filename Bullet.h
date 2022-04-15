@@ -13,16 +13,20 @@ private:
 	static int width, height;
 
 public:
-	int collisionFlag = 0;
-
 	Bullet(Config& cfg)
 		: SpaceObject(cfg)
 	{
 	}
 
-	Bullet(SDL_Point coord, SDL_FPoint to, int speed, Config& cfg)
+	Bullet(SDL_FPoint coord, SDL_FPoint to, int speed, Config& cfg)
 		: SpaceObject(coord, to, cfg) // to - not correct. just stub.
 	{
+		coord.x += config.position.x;
+		coord.y += config.position.y;
+
+		to.x += config.position.x;
+		to.y += config.position.y;
+
 		calcVector(to, speed);
 		init();
 	}
@@ -34,7 +38,7 @@ public:
 			getSpriteSize(sprite, width, height);
 		}
 		if (!sprite2) {
-			sprite2 = createSprite("data\\bullet.png");
+			sprite2 = createSprite("data\\bullet2.png");
 		}
 	}
 
@@ -56,24 +60,25 @@ public:
 			coord.x < config.position.x - getWidth() ||
 			coord.y > config.position.y + config.height ||
 			coord.y < config.position.y - getHeight()
-			)
-		{
+			) {
 			// destroy
 			return false;
 		}
 
-		if (abs(vector.x) >= config.speedFlag) {
-			if (vector.x > 0.001)
-				coord.x += 1;
-			else
-				coord.x -= 1;
+		//if (abs(vector.x) >= config.speedFlag) 
+		{
+			//if (vector.x > 0.001)
+				coord.x += vector.x;
+			//else
+				//coord.x -= vector.y;
 		}
 
-		if (abs(vector.y) >= config.speedFlag) {
-			if (vector.y > 0.001)
-				coord.y += 1;
-			else
-				coord.y -= 1;
+		//if (abs(vector.y) >= config.speedFlag) 
+		{
+			//if (vector.y > 0.001)
+				coord.y += vector.y;
+			//else
+				//coord.y -= vector.y;
 		}
 
 		return true;

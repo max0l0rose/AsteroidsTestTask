@@ -10,14 +10,15 @@ protected:
 	Config& config;
 
 public:
-	SDL_Point coord = { 0 };
+	SDL_FPoint coord = { 0 };
 	SDL_FPoint vector = { 0 };
+	int collisionFlag = 0;
 
 	SpaceObject(Config& cfg) : config(cfg)
 	{
 	}
 
-	SpaceObject(SDL_Point coord, SDL_FPoint vector, Config& cfg)
+	SpaceObject(SDL_FPoint coord, SDL_FPoint vector, Config& cfg)
 		: config(cfg)
 	{
 		this->coord = coord;

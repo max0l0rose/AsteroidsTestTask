@@ -10,16 +10,17 @@ struct Config
 	SDL_Point position = { 0 };
 
 #define GAME_STOPPED 0
-#define GAME_INIT 1
-#define GAME_GOES 2
+#define GAME_WIN 1
+#define GAME_INIT 2
+#define GAME_GOES 3
 
 	int gameMode = GAME_STOPPED;
 
 	void setPause(bool pause) {
-		Config::pause = pause;
+		pause = pause;
 	}
 	bool getPause() {
-		return Config::pause;
+		return pause;
 	}
 
 private:

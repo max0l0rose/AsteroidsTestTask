@@ -72,6 +72,7 @@ public:
 		config.position = { 0 };
 		asteroids.init(config.gameMode);
 		player.init();
+		bullets.deleteBullets();
 	}
 
 
@@ -123,10 +124,10 @@ public:
 	}
 
 	virtual void onMouseButtonClick(FRMouseButton button, bool isReleased) {
-		cout << "onMouseButtonClick: " << (int)button << " " << !isReleased << endl;
+		//cout << "onMouseButtonClick: " << (int)button << " " << !isReleased << endl;
 
 		if (!isReleased) {
-			SDL_Point start = { player.coord.x, player.coord.y };
+			SDL_FPoint start = { player.coord.x, player.coord.y };
 			SDL_FPoint dest = { mouseX, mouseY };
 			bullets.createBullet(start, dest, 3);
 		}
@@ -141,13 +142,12 @@ public:
 	}
 
 	virtual void onKeyPressed(FRKey k) {
-		if (config.gameMode == 0) {
+		if (config.gameMode < GAME_INIT) {
 			thread t1([this]() {
 				//this_thread::sleep_for(chrono::milliseconds(1000));
 				startGame();
 			});
 			t1.detach();
-			return;
 		}
 
 		switch (k)
@@ -170,11 +170,12 @@ public:
 		default:
 			break;
 		}
-		cout << "direction: " << (int)direction << " " << endl;
+		//cout << "direction: " << (int)direction << " " << endl;
 
 		//key = k;
 		//config->setPause(true);
-		cout << "onKeyPressed: " << (int)k << " " << endl;
+		
+		//cout << "onKeyPressed: " << (int)k << " " << endl;
 	}
 
 	virtual void onKeyReleased(FRKey k) {
@@ -195,16 +196,17 @@ public:
 		default:
 			break;
 		}
-		cout << "direction: " << (int)direction << " " << endl;
+		//cout << "direction: " << (int)direction << " " << endl;
 
 		//key = (FRKey)-1;
 		//config->setPause(false);
-		cout << "onKeyReleased: " << (int)k << " " << endl;
+
+		//cout << "onKeyReleased: " << (int)k << " " << endl;
 	}
 
 	virtual const char* GetTitle() override
 	{
-		return "asteroids";
+		return "Maxim's Asteroids";
 	}
 
 	static void showFps() {

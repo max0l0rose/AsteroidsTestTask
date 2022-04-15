@@ -7,7 +7,7 @@
 #include "AsteroidBig.h"
 #include <chrono>
 #include <future>
-#include <array>
+//#include <array>
 #include <iostream>
 #include "MyUtil.h"
 
@@ -16,13 +16,13 @@ using namespace std;
 class Asteroids
 {
 private:
-	array<Asteroid*, 20> arr;
 	Config& config;
-
 	mutex mtx;
 
 public:
-	Asteroids(Config& cfg) 
+	vector<Asteroid*> arr;
+
+	Asteroids(Config& cfg)
 		: config(cfg) 
 	{
 	}
@@ -35,10 +35,38 @@ public:
 		t1.detach();
 	}
 
+
+	void deleteAsteroid(Asteroid& ast) {
+		//arr.erase(
+		//	remove_if(
+		//		arr.begin(),
+		//		arr.end(),
+		//		//here comes the C++11 lambda:
+		//		[&](Asteroid const& node) {
+		//			return node == &ast;
+		//		}
+		//	),
+		//	arr.end()
+		//);
+		
+		arr.erase(remove(arr.begin(), arr.end(), &ast), arr.end());
+
+		//arr.erase();
+		delete &ast;
+	}
+	
+
+	void deleteAsteroids() {
+		for (auto iter = arr.begin(); iter != arr.end(); ) {
+			delete *iter;
+			iter = arr.erase(iter);
+		}
+	}
+
+
 	void createAsteroids() {
 		if (mtx.try_lock()) {
-			for (size_t i = 0; i < arr.size(); i++)
-				arr[i] = NULL;
+			deleteAsteroids();
 
 			//int w, h;
 			//getScreenSize(w, h);
@@ -63,40 +91,55 @@ public:
 			//	new AsteroidBig({ 1000, 100 }, { 0, 0 })
 			//};
 
+			//cout << "arr.size init: " << arr.size() << endl;
+
 			srand(time(NULL));
+#define ASTEROIDS_QUANTITY 20
+			for (size_t i = 0; i < ASTEROIDS_QUANTITY; i++) 
+			{
+				Asteroid* a = nullptr;
+				if (rand() % 10 >= 5)
+					a = new AsteroidSmall(config);
+				else
+					a = new AsteroidBig(config);
+				SDL_Point p;
 #define SHIP_ZONE_RADIUS 200
-			SDL_Rect playerZoneRect = { config.width/2-SHIP_ZONE_RADIUS, config.height/2-SHIP_ZONE_RADIUS, SHIP_ZONE_RADIUS*2, SHIP_ZONE_RADIUS*2 };
-			for (size_t i = 0; i < arr.size(); i++) {
-				int speedX, speedY;
-				do {
-					SDL_Point p;
-				mm:
-					p.x = rand() % config.width;
-					p.y = rand() % config.height;
-					SDL_bool isInPlayerRect = SDL_PointInRect(&p, &playerZoneRect);
-					if (isInPlayerRect == SDL_TRUE)
+				SDL_Rect playerZoneRect = {
+					config.position.x + config.width / 2 - SHIP_ZONE_RADIUS, config.position.x + config.height / 2 - SHIP_ZONE_RADIUS,
+					SHIP_ZONE_RADIUS * 2, SHIP_ZONE_RADIUS * 2
+				};
+			mm:
+				p.x = rand() % config.width;
+				p.y = rand() % config.height;
+				SDL_bool isInPlayerRect = SDL_PointInRect(&p, &playerZoneRect);
+				if (isInPlayerRect == SDL_TRUE)
+					goto mm;
+				a->coord.x = p.x;
+				a->coord.y = p.y;
+
+				for (size_t j = 0; j < i; j++) {
+					if (arr[j]->checkCollision(*a) == SDL_TRUE) {
 						goto mm;
-					int type = rand() % 10;
-					if (type >= 5)
-						arr[i] = new AsteroidSmall(config);
-					else
-						arr[i] = new AsteroidBig(config);
-					arr[i]->coord.x = p.x;
-					arr[i]->coord.y = p.y;
-					speedX = rand() % 6 - 3;
-					speedY = rand() % 6 - 3;
-					arr[i]->vector.x = speedX;
-					arr[i]->vector.y = speedY;
-					//SDL_Rect res;
-					for (size_t j = 0; j < i; j++) {
-						if (arr[i]->checkCollision(*arr[j]) == SDL_TRUE) {
-							goto mm;
-						}
 					}
-				} while (speedX == 0 && speedY == 0);
+				}
+
+				int speedX, speedY;
+			mm2:
+				speedX = rand() % 6 - 3;
+				speedY = rand() % 6 - 3;
+				if (speedX == 0 && speedY == 0)
+					goto mm2;
+				a->vector.x = speedX;
+				a->vector.y = speedY;
+
+				arr.push_back(a);
 
 				this_thread::sleep_for(chrono::milliseconds(50));
 			}
+
+			//if (arr.size() != ASTEROIDS_QUANTITY) {
+			//	cout << "arr.size error !!!!!!!!!!!!!!!!!!!!!!: " << arr.size() << endl;
+			//}
 
 			mtx.unlock();
 		}
@@ -104,29 +147,23 @@ public:
 
 	void draw() {
 		for (size_t i = 0; i < arr.size(); i++) {
-			if (arr[i] != NULL)
-				arr[i]->draw();
+			arr[i]->draw();
 		}
 	}
 
 	void move() {
 		for (size_t i = 0; i < arr.size(); i++) {
-			if (arr[i] != NULL)
-				arr[i]->move();
+			arr[i]->move();
 		}
 	}
 
 	void checkCollisionsToEachOther() {
-		//SDL_Rect res;
-		for (size_t i = 0; i < arr.size()-1; i++) 
+		for (size_t i=0; i<arr.size(); i++) 
 		{
-			if (arr[i] == NULL)
-				break;
-				
-			for (size_t j = i+1; j < arr.size(); j++)
+			for (size_t j = i+1; j<arr.size(); j++)
 			{
-				if (arr[j] == NULL)
-					break;
+				//if (arr[j] == NULL)
+				//	break;
 				if (
 					//abs(arr[i]->moveVector.x) >= config->speedFlag
 					//|| abs(arr[i]->moveVector.y) >= config->speedFlag
@@ -137,12 +174,7 @@ public:
 					)
 				{
 					if (arr[i]->checkCollision(*arr[j]) == SDL_TRUE) 
-					{
 						bounce(arr[i], arr[j]);
-
-						//delete arr[i]; delete arr[j];
-						//arr[i] = arr[j] = NULL;
-					}
 				}
 			}
 			if (arr[i]->collisionFlag > 0) 
@@ -152,21 +184,18 @@ public:
 
 
 
-	bool checkCollisionsToObj(SpaceObject& o) {
+	Asteroid* checkCollisionsToObj(SpaceObject& o) {
 		if (config.speedFlag < 3)
-			return false;
+			return nullptr;
 
 		for (size_t j = 0; j < arr.size(); j++)
 		{
-			if (arr[j] == NULL)
-				break;
-
 			if (arr[j]->checkCollision(o) == SDL_TRUE) {
-				return true;
+				return arr[j]; // collision
 			}
 		}
 
-		return false;
+		return nullptr; // OK
 	}
 
 
@@ -193,10 +222,7 @@ public:
 
 
 	~Asteroids() {
-		for (size_t i = 0; i < arr.size(); i++) {
-			if (arr[i] != NULL)
-				delete arr[i];
-		}
+		deleteAsteroids();
 	}
 };
 
