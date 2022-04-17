@@ -6,8 +6,8 @@
 struct Config
 {
 	int width = 0, height = 0;
-	int speedFlag = 0;
-	SDL_Point position = { 0 };
+	//int speedFlag = 0;
+	SDL_FPoint position = { 0 };
 
 #define GAME_STOPPED 0
 #define GAME_WIN 1

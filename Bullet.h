@@ -18,8 +18,8 @@ public:
 	{
 	}
 
-	Bullet(SDL_FPoint coord, SDL_FPoint to, int speed, Config& cfg)
-		: SpaceObject(coord, to, cfg) // to - not correct. just stub.
+	Bullet(SDL_FPoint& coord, SDL_FPoint& to, int speed, Config& cfg)
+				: SpaceObject(coord, to, cfg) // to - not correct. just stub.
 	{
 		coord.x += config.position.x;
 		coord.y += config.position.y;
@@ -43,19 +43,19 @@ public:
 	}
 
 
-	void calcVector(SDL_FPoint& to, int speed) {
-		vector = { to.x - coord.x, to.y - coord.y };
+	void calcVector(const SDL_FPoint& to, const float speed) {
+		vect = { to.x - coord.x, to.y - coord.y };
 
-		float m = std::fmax(abs(vector.x), abs(vector.y));
-		vector.x /= m;
-		vector.y /= m;
+		float m = std::fmax(abs(vect.x), abs(vect.y));
+		vect.x /= m;
+		vect.y /= m;
 
-		vector.x *= speed;
-		vector.y *= speed;
+		vect.x *= speed;
+		vect.y *= speed;
 	}
 
 
-	virtual bool move() { // false - means - to delete
+	bool move() { // false - means - to delete
 		if (coord.x > config.position.x + config.width ||
 			coord.x < config.position.x - getWidth() ||
 			coord.y > config.position.y + config.height ||
@@ -65,21 +65,9 @@ public:
 			return false;
 		}
 
-		//if (abs(vector.x) >= config.speedFlag) 
-		{
-			//if (vector.x > 0.001)
-				coord.x += vector.x;
-			//else
-				//coord.x -= vector.y;
-		}
-
-		//if (abs(vector.y) >= config.speedFlag) 
-		{
-			//if (vector.y > 0.001)
-				coord.y += vector.y;
-			//else
-				//coord.y -= vector.y;
-		}
+		//coord.x += vect.x;
+		//coord.y += vect.y;
+		SpaceObject::move();
 
 		return true;
 	}

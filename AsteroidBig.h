@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Asteroid.h"
+//#include "Asteroids.h"
+#include "AsteroidSmall.h"
+#include "MyUtil.h"
 
 class AsteroidBig : public Asteroid {
 private:
@@ -13,8 +16,8 @@ public:
 		init();
 	}
 
-	AsteroidBig(SDL_FPoint coord, SDL_FPoint vector, Config& cfg)
-		: Asteroid(coord, vector, cfg)
+	AsteroidBig(SDL_FPoint& coord, SDL_FPoint& vect, Config& cfg)
+		: Asteroid(coord, vect, cfg)
 	{
 		init();
 	}
@@ -28,6 +31,7 @@ public:
 			sprite2 = createSprite("data\\big_asteroid2.png");
 		}
 	}
+
 
 protected:
 	Sprite* getSprite() const {

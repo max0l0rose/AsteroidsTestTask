@@ -13,8 +13,8 @@ public:
 		init();
 	}
 
-	AsteroidSmall(SDL_FPoint coord, SDL_FPoint vector, Config& cfg)
-		: Asteroid(coord, vector, cfg)
+	AsteroidSmall(SDL_FPoint& coord, SDL_FPoint& vect, Config& cfg)
+		: Asteroid(coord, vect, cfg)
 	{
 		init();
 	}

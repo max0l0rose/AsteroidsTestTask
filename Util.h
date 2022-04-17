@@ -7,9 +7,9 @@
 
 //using namespace std;
 
-//void gerRndVector(SDL_Point& vector) {
-//	vector.x = rand() % 6 - 3;
-//	vector.y = rand() % 6 - 3;
+//void gerRndVector(SDL_Point& vect) {
+//	vect.x = rand() % 6 - 3;
+//	vect.y = rand() % 6 - 3;
 //}
 
 

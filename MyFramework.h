@@ -35,12 +35,17 @@ private:
 	static int fps;
 	Direction direction = Direction::NONE;
 
+	bool mouseButtonPressed = false;
+	int mouseX = 0, mouseY = 0;
+	Uint32 fireTicks = 0;
+
 public:
 
 	MyFramework() 
 		: player(asteroids, config), asteroids(config), bullets(asteroids, config)
 	{
 	}
+
 
 	virtual void PreInit(int& width, int& height, bool& fullscreen)
 	{
@@ -53,7 +58,9 @@ public:
 	virtual bool Init() {
 		fps = 0;
 
+		config.gameMode == GAME_STOPPED;
 		startGame(); 
+		//player.init();
 
 		bg = createSprite("data\\background_big.png");
 		thread t2(showFps);
@@ -70,51 +77,62 @@ public:
 			return;
 		config.gameMode = GAME_INIT;
 		config.position = { 0 };
-		asteroids.init(config.gameMode);
 		player.init();
+		asteroids.init(config.gameMode);
 		bullets.deleteBullets();
 	}
 
 
 	virtual bool Tick() {
-		Uint32 ticks = SDL_GetTicks();
+		//Uint32 ticks = SDL_GetTicks();
 		//cout << ticks << " ";
-
-		if (++config.speedFlag > 3) {
-			config.speedFlag = 1;
-		}
 
 		fps++;
 
 		//drawTestBackground();
 		drawSprite(bg, 0, 0);
 		asteroids.draw();
+		player.draw();
+		bullets.draw();
 		if (config.gameMode > GAME_STOPPED) {
-			player.draw();
-			bullets.draw();
-			asteroids.checkCollisionsToEachOther();
-			player.checkCollisionsToAsteroids();
-			bullets.checkCollisions();
+			if (config.gameMode == GAME_GOES) {
+				asteroids.checkCollisionsToEachOther();
+				player.checkCollisionsToAsteroids();
+				bullets.checkCollisions();
+			}
 			asteroids.move();
 			player.move();
 			bullets.move();
 		}
 
 
+		// move
 		if ((int)direction & (int)Direction::RIGHT)
-			player.vector.x = 3;
+			player.vect.x = 2;
 		if ((int)direction & (int)Direction::LEFT)
-			player.vector.x = -3;
+			player.vect.x = -2;
 		if ((int)direction & (int)Direction::DOWN)
-			player.vector.y = 3;
+			player.vect.y = 2;
 		if ((int)direction & (int)Direction::UP)
-			player.vector.y = -3;
+			player.vect.y = -2;
 
-		this_thread::sleep_for(chrono::milliseconds(10));
+
+		// fire
+		if (mouseButtonPressed && ++fireTicks % 10 == 0)
+			fire();
+
+#define DELAY 10
+		this_thread::sleep_for(chrono::milliseconds(DELAY));
 		return false;
 	}
 
-	int mouseX = 0, mouseY = 0;
+	
+	void fire() {
+		SDL_FPoint start = { player.coord.x, player.coord.y };
+		SDL_FPoint dest = { mouseX, mouseY };
+#define BULLET_SPEED 5
+		bullets.createBullet(start, dest, BULLET_SPEED);
+	}
 
 	virtual void onMouseMove(int x, int y, int xrelative, int yrelative) {
 		//cout << "onMouseMove: " << x << " " << y << " " << xrelative << " " << yrelative << endl;
@@ -123,13 +141,13 @@ public:
 		mouseY = y;
 	}
 
+
 	virtual void onMouseButtonClick(FRMouseButton button, bool isReleased) {
 		//cout << "onMouseButtonClick: " << (int)button << " " << !isReleased << endl;
 
-		if (!isReleased) {
-			SDL_FPoint start = { player.coord.x, player.coord.y };
-			SDL_FPoint dest = { mouseX, mouseY };
-			bullets.createBullet(start, dest, 3);
+		if (mouseButtonPressed = !isReleased) {
+			fire();
+			fireTicks = 0;
 		}
 
 		//SDL_Window* window = SDL_CreateWindowFrom(0);
@@ -142,12 +160,17 @@ public:
 	}
 
 	virtual void onKeyPressed(FRKey k) {
-		if (config.gameMode < GAME_INIT) {
-			thread t1([this]() {
-				//this_thread::sleep_for(chrono::milliseconds(1000));
-				startGame();
-			});
-			t1.detach();
+		if (config.gameMode == GAME_STOPPED || config.gameMode == GAME_WIN) {
+			////if (m1.try_lock()) 
+			////{
+			//	thread t1([this]() {
+			//		//m1.try_lock();
+			//		//this_thread::sleep_for(chrono::milliseconds(1000));
+			//		//m1.unlock();
+			//		});
+			//	t1.detach();
+			////}
+			startGame();
 		}
 
 		switch (k)

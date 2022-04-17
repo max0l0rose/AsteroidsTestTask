@@ -8,8 +8,10 @@
 #include <chrono>
 #include <future>
 //#include <array>
+#include <vector>
 #include <iostream>
 #include "MyUtil.h"
+#include <typeinfo>
 
 using namespace std;
 
@@ -30,13 +32,13 @@ public:
 	void init(int& doneFlag) {
 		thread t1([this](int* doneFlag) { 
 				createAsteroids(); 
-				*doneFlag = 2; // 2 - game
+				*doneFlag = GAME_GOES; 
 			}, &doneFlag);
 		t1.detach();
 	}
 
 
-	void deleteAsteroid(Asteroid& ast) {
+	void deleteAsteroid(vector<Asteroid*>::iterator iter) {
 		//arr.erase(
 		//	remove_if(
 		//		arr.begin(),
@@ -49,12 +51,45 @@ public:
 		//	arr.end()
 		//);
 		
-		arr.erase(remove(arr.begin(), arr.end(), &ast), arr.end());
+		Asteroid* aster = (*iter);
+		aster->boom(arr);
+		
+		//string s2 = typeid(AsteroidBig).name();
+		AsteroidBig* bs = dynamic_cast<AsteroidBig*>(aster);
+		if (bs != nullptr) { // it is big
+			boomBigAsteroid(*bs);
+		}
 
-		//arr.erase();
-		delete &ast;
+		delete *iter; // &ast;
+		//arr.erase(remove(arr.begin(), arr.end(), &ast), arr.end());
+		arr.erase(iter);
 	}
-	
+
+
+	void boomBigAsteroid(Asteroid& bigAster) {
+		AsteroidSmall* newAst = createSmallBoomAsteroid(bigAster);
+		arr.push_back(newAst);
+		//arr.insert(arr.begin(), newAst);
+		newAst = createSmallBoomAsteroid(bigAster);
+		arr.push_back(newAst);
+	}
+
+	AsteroidSmall* createSmallBoomAsteroid(Asteroid& astBig) {
+		vector<Asteroid*>::iterator it;
+		AsteroidSmall* astNew = nullptr;
+		do {
+			delete astNew;
+			SDL_FPoint c = astBig.coord;
+#define BOOM_RADIUS 50
+			MyUtil::movePointRnd(c, BOOM_RADIUS, BOOM_RADIUS);
+			SDL_FPoint v;
+			MyUtil::getRndVector(v);
+			astNew = new AsteroidSmall(c, v, config);
+			it = checkCollisionsToObj(*astNew);
+		} while (it != arr.end());
+		return astNew;
+	}
+
 
 	void deleteAsteroids() {
 		for (auto iter = arr.begin(); iter != arr.end(); ) {
@@ -64,8 +99,19 @@ public:
 	}
 
 
+	Asteroid* createRandomAsteroid() {
+		Asteroid* a;
+		if (rand() % 10 >= 5)
+			a = new AsteroidSmall(config);
+		else
+			a = new AsteroidBig(config);
+		return a;
+	}
+
+
 	void createAsteroids() {
-		if (mtx.try_lock()) {
+		//if (mtx.try_lock()) 
+		//{
 			deleteAsteroids();
 
 			//int w, h;
@@ -97,15 +143,14 @@ public:
 #define ASTEROIDS_QUANTITY 20
 			for (size_t i = 0; i < ASTEROIDS_QUANTITY; i++) 
 			{
-				Asteroid* a = nullptr;
-				if (rand() % 10 >= 5)
-					a = new AsteroidSmall(config);
-				else
-					a = new AsteroidBig(config);
+				Asteroid* a = createRandomAsteroid();
 				SDL_Point p;
 #define SHIP_ZONE_RADIUS 200
 				SDL_Rect playerZoneRect = {
-					config.position.x + config.width / 2 - SHIP_ZONE_RADIUS, config.position.x + config.height / 2 - SHIP_ZONE_RADIUS,
+					//config.position.x + 
+					config.width / 2 - SHIP_ZONE_RADIUS, 
+					//config.position.x + 
+					config.height / 2 - SHIP_ZONE_RADIUS,
 					SHIP_ZONE_RADIUS * 2, SHIP_ZONE_RADIUS * 2
 				};
 			mm:
@@ -117,65 +162,80 @@ public:
 				a->coord.x = p.x;
 				a->coord.y = p.y;
 
-				for (size_t j = 0; j < i; j++) {
+				for (int j = 0; j < i; j++) {
 					if (arr[j]->checkCollision(*a) == SDL_TRUE) {
 						goto mm;
 					}
 				}
 
-				int speedX, speedY;
-			mm2:
-				speedX = rand() % 6 - 3;
-				speedY = rand() % 6 - 3;
-				if (speedX == 0 && speedY == 0)
-					goto mm2;
-				a->vector.x = speedX;
-				a->vector.y = speedY;
+				do {
+					MyUtil::getRndVector(a->vect);
+				} while (a->vect.x == 0 && a->vect.y == 0);
 
+				mtx.lock();
 				arr.push_back(a);
+				mtx.unlock();
 
-				this_thread::sleep_for(chrono::milliseconds(50));
+				this_thread::sleep_for(chrono::milliseconds(100));
 			}
 
-			//if (arr.size() != ASTEROIDS_QUANTITY) {
-			//	cout << "arr.size error !!!!!!!!!!!!!!!!!!!!!!: " << arr.size() << endl;
-			//}
 
-			mtx.unlock();
-		}
+			if (arr.size() != ASTEROIDS_QUANTITY) {
+				cout << "arr.size !!!!!!!!!!!!!!!!!!!!!!: " << arr.size() << endl;
+			}
+
+		//}
 	}
+
 
 	void draw() {
-		for (size_t i = 0; i < arr.size(); i++) {
+		//for (auto iter = arr.begin(); iter < arr.end(); iter++) {
+		//	(*iter)->draw();
+		//}
+
+		bool init = false;
+		if (config.gameMode == GAME_INIT) {
+			mtx.lock();
+			init = true;
+		}
+		//for (Asteroid* el : arr) {
+		//	el->draw();
+		//}
+		for (int i = 0; i < arr.size(); i++) {
 			arr[i]->draw();
 		}
+		if (init)
+			mtx.unlock();
+
 	}
+
 
 	void move() {
-		for (size_t i = 0; i < arr.size(); i++) {
-			arr[i]->move();
+		//for (auto iter = arr.begin(); iter < arr.end(); iter++ ) {
+		//	(*iter)->move();
+		//}
+
+		if (config.gameMode == GAME_INIT)
+			mtx.lock();
+		for (Asteroid* el : arr) {
+			el->move();
 		}
+		if (config.gameMode == GAME_INIT)
+			mtx.unlock();
+
+		//for (int i = 0; i < arr.size(); i++) {
+		//	arr[i]->move();
+		//}
 	}
 
+
 	void checkCollisionsToEachOther() {
-		for (size_t i=0; i<arr.size(); i++) 
+		for (int i=0; i<arr.size(); i++) 
 		{
-			for (size_t j = i+1; j<arr.size(); j++)
+			for (int j = i+1; j<arr.size(); j++)
 			{
-				//if (arr[j] == NULL)
-				//	break;
-				if (
-					//abs(arr[i]->moveVector.x) >= config->speedFlag
-					//|| abs(arr[i]->moveVector.y) >= config->speedFlag
-					//||
-					//abs(arr[j]->moveVector.x) >= config->speedFlag
-					//|| abs(arr[j]->moveVector.y) >= config->speedFlag
-					config.speedFlag == 3
-					)
-				{
-					if (arr[i]->checkCollision(*arr[j]) == SDL_TRUE) 
-						bounce(arr[i], arr[j]);
-				}
+				if (arr[i]->checkCollision(*arr[j]) == SDL_TRUE) 
+					bounce(arr[i], arr[j]);
 			}
 			if (arr[i]->collisionFlag > 0) 
 				arr[i]->collisionFlag--;
@@ -183,43 +243,29 @@ public:
 	}
 
 
-
-	Asteroid* checkCollisionsToObj(SpaceObject& o) {
-		if (config.speedFlag < 3)
-			return nullptr;
-
-		for (size_t j = 0; j < arr.size(); j++)
-		{
-			if (arr[j]->checkCollision(o) == SDL_TRUE) {
-				return arr[j]; // collision
+	//Asteroid* 
+	vector<Asteroid*>::iterator checkCollisionsToObj(const SpaceObject& o) {
+		for (vector<Asteroid*>::iterator iter = arr.begin(); iter < arr.end(); iter++ ) {
+			if ((* iter)->checkCollision(o) == SDL_TRUE) {
+				return iter; // collision
 			}
 		}
 
-		return nullptr; // OK
+		return arr.end();// nullptr; // OK
 	}
 
 
 	void bounce(Asteroid* a, Asteroid* b) {
-		SDL_FPoint tmpVec = a->vector;
-		a->vector = b->vector;
+		SDL_FPoint tmpVec = a->vect;
+		a->vect = b->vect;
 		if (a->collisionFlag == 0) 
 #define COLLISION_TICKS 30
 			a->collisionFlag = COLLISION_TICKS;
 
-		b->vector = tmpVec;
+		b->vect = tmpVec;
 		if (b->collisionFlag == 0) 
 			b->collisionFlag = COLLISION_TICKS;
 	}
-
-
-	//void flyApart(Asteroid* a, Asteroid* b) {
-	//	//config->setPause(true);
-
-	//	//MyUtil::gerRndVector(a->moveVector);
-	//	//a->coord.x += a->moveVector.x * 10;
-	//	//a->coord.y += a->moveVector.y * 10;
-	//}
-
 
 	~Asteroids() {
 		deleteAsteroids();

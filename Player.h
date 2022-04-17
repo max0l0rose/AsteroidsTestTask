@@ -14,7 +14,7 @@ class Player : public SpaceObject
 	Sprite* sprite = NULL;
 	int width = 0, height = 0;
 	
-	int speedDivider = 0;
+	//int speedDivider = 0;
 
 	Asteroids& asteroids;
 
@@ -34,33 +34,35 @@ public:
 		coord.y = (config.height - height) / 2;
 	}
 
-	void move() {
-		if (vector.x != 0) {
-			config.position.x += vector.x;
-			coord.x += vector.x;
-			if (speedDivider == 0) {
-				if (vector.x > 0)
-					vector.x -= 1;
+
+	bool move() {
+		if (abs(vect.x) > 0.001) {
+			config.position.x += vect.x;
+			coord.x += vect.x;
+			//if (speedDivider == 0) {
+				if (vect.x > 0)
+					vect.x -= 0.05;
 				else
-					vector.x += 1;
-			}
+					vect.x += 0.05;
+			//}
 			//cout << "config->position.x " << config.position.x << endl;
 		}
-		if (vector.y != 0) {
-			config.position.y += vector.y;
-			coord.y += vector.y;
-			if (speedDivider == 0) {
-				if (vector.y > 0)
-					vector.y -= 1;
+		if (abs(vect.y) > 0.001) {
+			config.position.y += vect.y;
+			coord.y += vect.y;
+			//if (speedDivider == 0) {
+				if (vect.y > 0)
+					vect.y -= 0.05;
 				else
-					vector.y += 1;
-			}
+					vect.y += 0.05;
+			//}
 			//cout << "config->position.y " << config.position.y << endl;
 		}
-		if (--speedDivider==-1) {
-			speedDivider = 20;
-		}
+		//if (--speedDivider==-1) {
+		//	speedDivider = 3;
+		//}
 
+		return true;
 	}
 
 
@@ -71,8 +73,11 @@ public:
 
 	void checkCollisionsToAsteroids() 
 	{
-		Asteroid* ast = asteroids.checkCollisionsToObj(*this);
-		if (ast != nullptr) {
+		//Asteroid* ast = 
+		vector<Asteroid*>::iterator iter = asteroids.checkCollisionsToObj(*this);
+		//if (ast != nullptr) 
+		if (iter != asteroids.arr.end())
+		{
 			config.gameMode = GAME_STOPPED;
 		}
 	}
